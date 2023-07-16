@@ -1,7 +1,10 @@
+import 'dart:js_util';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stylecase/screens/home.dart';
 import 'package:stylecase/theme/app_colors.dart';
 import 'package:stylecase/widgets/button.dart';
@@ -33,6 +36,14 @@ class _LoginState extends State<Login> {
         setState(() => screen = 'OTP');
       } else {
         await confirmationResult.confirm(otpController.text);
+        String? uid = auth.currentUser?.uid;
+        final SharedPreferences pref = await SharedPreferences.getInstance();
+        print(uid);
+        if (uid != null) {
+          pref.setString("uid", uid);
+        } else {
+          Future.error("Uid is empty");
+        }
         setState(() => isLoading = false);
         Get.to(const Home(), transition: Transition.fade);
       }
@@ -60,8 +71,22 @@ class _LoginState extends State<Login> {
           : null,
       body: Row(
         children: [
+          if (!context.isPhone)
+            Flexible(
+              flex: 3,
+              child: Container(
+                constraints: const BoxConstraints.expand(),
+                color: const Color(AppColors.primary),
+                child: FractionallySizedBox(
+                  widthFactor: 0.5,
+                  child: Image.asset(
+                    'assets/StyleCase.png',
+                  ),
+                ),
+              ),
+            ),
           Flexible(
-            flex: 1,
+            flex: 2,
             child: Center(
               child: AnimatedSwitcher(
                   transitionBuilder:
@@ -111,17 +136,6 @@ class _LoginState extends State<Login> {
                         )),
             ),
           ),
-          if (!context.isPhone)
-            Flexible(
-              flex: 1,
-              child: Container(
-                constraints: const BoxConstraints.expand(),
-                color: const Color(AppColors.primary),
-                child: Image.asset(
-                  'assets/StyleCase.png',
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -143,8 +157,8 @@ class OtpCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 5,
-      child: SizedBox(
-        width: 400,
+      child: FractionallySizedBox(
+        widthFactor: 0.7,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
           child: Column(
@@ -154,7 +168,7 @@ class OtpCard extends StatelessWidget {
               const Text(
                 "Verify Your Phone Number",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 24,
@@ -216,8 +230,8 @@ class LoginCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 5,
-      child: SizedBox(
-        width: 400,
+      child: FractionallySizedBox(
+        widthFactor: 0.7,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
           child: Column(
@@ -225,9 +239,9 @@ class LoginCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                "Login to Your Account",
+                "Login/Register to Your Account",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 24,
